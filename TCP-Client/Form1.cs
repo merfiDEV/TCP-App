@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,6 +25,7 @@ namespace TCP_Client
         {
             var ipAddress = hostTextBox.Text;
             var port = int.Parse(portTextBox.Text);
+            _client.Nickname = nicknameTextBox.Text;
             try
             {
                 _client.Connect(ipAddress, port);
@@ -34,9 +35,10 @@ namespace TCP_Client
                 MessageBox.Show(exception.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            statusBar1.Text = $@"Connected to {ipAddress}:{port}";
+            statusLabel.Text = $@"Connected to {ipAddress}:{port}";
             hostTextBox.Enabled = false;
             portTextBox.Enabled = false;
+            nicknameTextBox.Enabled = false;
             disconnectButton.Enabled = true;
             connectButton.Enabled = false;
         }
@@ -62,9 +64,10 @@ namespace TCP_Client
         private void disconnectButton_Click(object sender, EventArgs e)
         {
             _client.Disconnect();
-            statusBar1.Text = @"Disconnected";
+            statusLabel.Text = @"Disconnected";
             hostTextBox.Enabled = true;
             portTextBox.Enabled = true;
+            nicknameTextBox.Enabled = true;
             connectButton.Enabled = true;
             disconnectButton.Enabled = false;
         }
