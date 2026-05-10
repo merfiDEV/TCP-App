@@ -92,7 +92,7 @@ namespace TCP_Client
             // https://stackoverflow.com/questions/1167771/methodinvoker-vs-action-for-control-begininvoke
             messageTextBox.Invoke((MethodInvoker)(() =>
             {
-                AppendTextWithMentions(messageTextBox, "Server: " + message);
+                AppendTextWithMentions(messageTextBox, message);
             }));
         }
 

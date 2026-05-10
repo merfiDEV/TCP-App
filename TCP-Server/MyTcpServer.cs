@@ -12,6 +12,8 @@ namespace TCP_Server
         private readonly string _ipAddress;
         private readonly int _port;
         private readonly System.Collections.Concurrent.ConcurrentDictionary<System.Net.EndPoint, string> _nicknames = new System.Collections.Concurrent.ConcurrentDictionary<System.Net.EndPoint, string>();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<TcpClient, byte> _connectedClients = new System.Collections.Concurrent.ConcurrentDictionary<TcpClient, byte>();
+
 
         public event EventHandler<string> MessageReceived;
 
@@ -46,6 +48,7 @@ namespace TCP_Server
             {
                 // Handle new client connection
                 TcpClient client = await _server.AcceptTcpClientAsync();
+                _connectedClients.TryAdd(client, 0);
                 OnMessageReceived($"Connected! Client IP: {client.Client.RemoteEndPoint}");
                 _ = HandleClientAsync(client);
             }
@@ -64,43 +67,65 @@ namespace TCP_Server
             byte[] buffer = new byte[1024];
             StringBuilder messageBuilder = new StringBuilder();
 
-            // Receive data in a loop until the client disconnects
-            while (true)
+            try
             {
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-                if (bytesRead == 0)
+                // Receive data in a loop until the client disconnects
+                while (true)
                 {
-                    OnMessageReceived($"Client {client.Client.RemoteEndPoint} disconnected.");
-                    break; // Client disconnected
-                }
+                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                messageBuilder.Append(data);
-
-                if (data.Length > 0)
-                {
-                    string receivedMessage = messageBuilder.ToString().TrimEnd();
-
-                    if (receivedMessage.StartsWith("NICK:"))
+                    if (bytesRead == 0)
                     {
-                        string nick = receivedMessage.Substring(5);
-                        _nicknames[client.Client.RemoteEndPoint] = nick;
-                        OnMessageReceived($"{client.Client.RemoteEndPoint} identified as: {nick}");
-                        messageBuilder.Clear();
-                        continue;
+                        OnMessageReceived($"Client {client.Client.RemoteEndPoint} disconnected.");
+                        break; // Client disconnected
                     }
 
-                    string displayName = _nicknames.TryGetValue(client.Client.RemoteEndPoint, out var name) ? name : client.Client.RemoteEndPoint.ToString();
+                    string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    messageBuilder.Append(data);
 
-                    // Raise the MessageReceived event
-                    OnMessageReceived($"{displayName}: {receivedMessage}");
+                    if (data.Length > 0)
+                    {
+                        string receivedMessage = messageBuilder.ToString().TrimEnd();
 
-                    byte[] response = Encoding.UTF8.GetBytes(receivedMessage + Environment.NewLine);
-                    await stream.WriteAsync(response, 0, response.Length);
+                        if (receivedMessage.StartsWith("NICK:"))
+                        {
+                            string nick = receivedMessage.Substring(5);
+                            _nicknames[client.Client.RemoteEndPoint] = nick;
+                            OnMessageReceived($"{client.Client.RemoteEndPoint} identified as: {nick}");
+                            messageBuilder.Clear();
+                            continue;
+                        }
 
-                    messageBuilder.Clear();
+                        string displayName = _nicknames.TryGetValue(client.Client.RemoteEndPoint, out var name) ? name : client.Client.RemoteEndPoint.ToString();
+                        string formattedMessage = $"{displayName}: {receivedMessage}";
+
+                        // Raise the MessageReceived event
+                        OnMessageReceived(formattedMessage);
+
+                        byte[] response = Encoding.UTF8.GetBytes(formattedMessage + Environment.NewLine);
+
+                        foreach (var connectedClient in _connectedClients.Keys)
+                        {
+                            try
+                            {
+                                if (connectedClient.Connected)
+                                {
+                                    await connectedClient.GetStream().WriteAsync(response, 0, response.Length);
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore errors for individual clients during broadcast
+                            }
+                        }
+
+                        messageBuilder.Clear();
+                    }
                 }
+            }
+            finally
+            {
+                _connectedClients.TryRemove(client, out _);
             }
         }
 
