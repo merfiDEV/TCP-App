@@ -43,6 +43,7 @@ namespace TCP_Client
             this.sendTextBox = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.ledToggleCheckBox = new System.Windows.Forms.CheckBox();
+            this.themeToggleCheckBox = new System.Windows.Forms.CheckBox();
             this.nicknameTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
@@ -206,11 +207,24 @@ namespace TCP_Client
             this.ledToggleCheckBox.UseVisualStyleBackColor = true;
             this.ledToggleCheckBox.CheckedChanged += new System.EventHandler(this.ledToggleCheckBox_CheckedChanged);
             // 
+            // themeToggleCheckBox
+            // 
+            this.themeToggleCheckBox.AutoSize = true;
+            this.themeToggleCheckBox.Location = new System.Drawing.Point(154, 252);
+            this.themeToggleCheckBox.Name = "themeToggleCheckBox";
+            this.themeToggleCheckBox.Size = new System.Drawing.Size(103, 21);
+            this.themeToggleCheckBox.TabIndex = 8;
+            this.themeToggleCheckBox.Text = "Dark Theme";
+            this.themeToggleCheckBox.UseVisualStyleBackColor = true;
+            this.themeToggleCheckBox.Checked = true;
+            this.themeToggleCheckBox.CheckedChanged += new System.EventHandler(this.themeToggleCheckBox_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(695, 337);
+            this.Controls.Add(this.themeToggleCheckBox);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.sendTextBox);
             this.Controls.Add(this.disconnectButton);
@@ -232,6 +246,7 @@ namespace TCP_Client
 
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox ledToggleCheckBox;
+        private System.Windows.Forms.CheckBox themeToggleCheckBox;
 
         private System.Windows.Forms.TextBox sendTextBox;
 
