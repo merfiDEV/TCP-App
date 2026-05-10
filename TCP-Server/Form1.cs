@@ -64,7 +64,7 @@ namespace TCP_Server
             // https://stackoverflow.com/questions/1167771/methodinvoker-vs-action-for-control-begininvoke
             logTextBox.Invoke((MethodInvoker)(() =>
             {
-                logTextBox.AppendText(message + Environment.NewLine);
+                AppendTextWithMentions(logTextBox, message + Environment.NewLine);
             }));
 
             // Check if message contains LED ON/OFF commands
@@ -122,6 +122,42 @@ namespace TCP_Server
 
             return ips[0];
         }
-        
+
+        private void AppendTextWithMentions(RichTextBox box, string text)
+        {
+            int startIndex = box.TextLength;
+            box.AppendText(text);
+            
+            int index = startIndex;
+            while (index < box.TextLength)
+            {
+                int wordStartIndex = box.Text.IndexOf('@', index);
+                if (wordStartIndex == -1) break;
+                
+                int wordEndIndex = box.TextLength;
+                for (int i = wordStartIndex + 1; i < box.TextLength; i++)
+                {
+                    char c = box.Text[i];
+                    if (char.IsWhiteSpace(c) || char.IsPunctuation(c))
+                    {
+                        wordEndIndex = i;
+                        break;
+                    }
+                }
+                
+                if (wordEndIndex > wordStartIndex + 1)
+                {
+                    box.Select(wordStartIndex, wordEndIndex - wordStartIndex);
+                    box.SelectionColor = System.Drawing.Color.DeepSkyBlue;
+                    box.SelectionFont = new System.Drawing.Font(box.Font, System.Drawing.FontStyle.Bold);
+                }
+                
+                index = wordEndIndex;
+            }
+            
+            box.Select(box.TextLength, 0);
+            box.SelectionColor = box.ForeColor;
+            box.SelectionFont = box.Font;
+        }
     }
 }

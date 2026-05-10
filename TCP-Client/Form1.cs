@@ -92,8 +92,45 @@ namespace TCP_Client
             // https://stackoverflow.com/questions/1167771/methodinvoker-vs-action-for-control-begininvoke
             messageTextBox.Invoke((MethodInvoker)(() =>
             {
-                messageTextBox.AppendText("Server: " + message);
+                AppendTextWithMentions(messageTextBox, "Server: " + message);
             }));
+        }
+
+        private void AppendTextWithMentions(RichTextBox box, string text)
+        {
+            int startIndex = box.TextLength;
+            box.AppendText(text);
+            
+            int index = startIndex;
+            while (index < box.TextLength)
+            {
+                int wordStartIndex = box.Text.IndexOf('@', index);
+                if (wordStartIndex == -1) break;
+                
+                int wordEndIndex = box.TextLength;
+                for (int i = wordStartIndex + 1; i < box.TextLength; i++)
+                {
+                    char c = box.Text[i];
+                    if (char.IsWhiteSpace(c) || char.IsPunctuation(c))
+                    {
+                        wordEndIndex = i;
+                        break;
+                    }
+                }
+                
+                if (wordEndIndex > wordStartIndex + 1)
+                {
+                    box.Select(wordStartIndex, wordEndIndex - wordStartIndex);
+                    box.SelectionColor = Color.DeepSkyBlue;
+                    box.SelectionFont = new Font(box.Font, FontStyle.Bold);
+                }
+                
+                index = wordEndIndex;
+            }
+            
+            box.Select(box.TextLength, 0);
+            box.SelectionColor = box.ForeColor;
+            box.SelectionFont = box.Font;
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
