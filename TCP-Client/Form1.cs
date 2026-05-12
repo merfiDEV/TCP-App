@@ -13,47 +13,126 @@ namespace TCP_Client
     public partial class Form1 : Form
     {
         MyTcpClient _client;
+
+        // Modern Theme Colors
+        private readonly Color BackColorDark = Color.FromArgb(19, 19, 19);
+        private readonly Color SurfaceColor = Color.FromArgb(27, 27, 27);
+        private readonly Color InputBackColor = Color.FromArgb(14, 14, 14);
+        private readonly Color PrimaryColor = Color.FromArgb(163, 201, 255);
+        private readonly Color AccentColor = Color.FromArgb(0, 120, 212);
+        private readonly Color TextColor = Color.FromArgb(229, 226, 225);
+        private readonly Color TextDimColor = Color.FromArgb(192, 199, 212);
+
         public Form1()
         {
             InitializeComponent();
+
+            // Enable Double Buffering to reduce flickering
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            this.UpdateStyles();
             
             _client = new MyTcpClient();
             _client.MessageReceived += Server_MessageReceived;
 
-            ApplyTheme(this, true);
+            ApplyModernTheme();
         }
 
-        private void ApplyTheme(Control control, bool isDarkTheme)
+        private void ApplyModernTheme()
         {
-            control.BackColor = isDarkTheme ? System.Drawing.Color.FromArgb(45, 45, 48) : System.Drawing.SystemColors.Control;
-            control.ForeColor = isDarkTheme ? System.Drawing.Color.White : System.Drawing.SystemColors.ControlText;
-
-            if (control is TextBox || control is RichTextBox)
-            {
-                control.BackColor = isDarkTheme ? System.Drawing.Color.FromArgb(30, 30, 30) : System.Drawing.SystemColors.Window;
-                control.ForeColor = isDarkTheme ? System.Drawing.Color.White : System.Drawing.SystemColors.WindowText;
-                if (control is TextBoxBase textBoxBase)
-                {
-                    textBoxBase.BorderStyle = BorderStyle.FixedSingle;
-                }
-            }
+            this.BackColor = BackColorDark;
+            this.ForeColor = TextColor;
             
-            if (control is Button button)
-            {
-                button.FlatStyle = FlatStyle.Flat;
-                button.FlatAppearance.BorderColor = isDarkTheme ? System.Drawing.Color.FromArgb(100, 100, 100) : System.Drawing.SystemColors.ControlDark;
-                button.BackColor = isDarkTheme ? System.Drawing.Color.FromArgb(60, 60, 60) : System.Drawing.SystemColors.Control;
-            }
+            // Use Segoe UI for a cleaner look
+            this.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
 
-            foreach (Control child in control.Controls)
-            {
-                ApplyTheme(child, isDarkTheme);
-            }
+            // Side Panel Styling
+            sidebarPanel.BackColor = SurfaceColor;
+            sidebarHeaderLabel.ForeColor = PrimaryColor;
+            sidebarHeaderLabel.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            sidebarSubLabel.ForeColor = TextDimColor;
+            
+            connectionNavLabel.ForeColor = TextDimColor;
+            terminalNavLabel.ForeColor = PrimaryColor;
+            terminalNavLabel.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            ledNavLabel.ForeColor = TextDimColor;
+            settingsNavLabel.ForeColor = TextDimColor;
+
+            // Header Styling
+            headerPanel.BackColor = Color.FromArgb(25, 25, 25);
+            headerTitleLabel.ForeColor = TextColor;
+            headerTitleLabel.Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold);
+
+            // Footer Styling
+            footerPanel.BackColor = Color.FromArgb(14, 14, 14);
+            statusLabel.ForeColor = TextDimColor;
+
+            // Main Content Styling
+            StyleGroupBox(groupBox1);
+            StyleGroupBox(groupBox2);
+            
+            StyleTextBox(hostTextBox);
+            StyleTextBox(portTextBox);
+            StyleTextBox(nicknameTextBox);
+            StyleTextBox(sendTextBox);
+            
+            StyleRichTextBox(messageTextBox);
+
+            StyleButton(connectButton, true);
+            StyleButton(disconnectButton, false);
+            StyleButton(button2, true);
+
+            StyleCheckBox(ledToggleCheckBox);
+            StyleCheckBox(themeToggleCheckBox);
         }
-        
+
+        private void StyleGroupBox(GroupBox gb)
+        {
+            gb.ForeColor = PrimaryColor;
+            gb.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+        }
+
+        private void StyleTextBox(TextBox tb)
+        {
+            tb.BackColor = InputBackColor;
+            tb.ForeColor = TextColor;
+            tb.BorderStyle = BorderStyle.FixedSingle;
+            tb.Font = new Font("Segoe UI", 10F);
+        }
+
+        private void StyleRichTextBox(RichTextBox rtb)
+        {
+            rtb.BackColor = InputBackColor;
+            rtb.ForeColor = TextColor;
+            rtb.BorderStyle = BorderStyle.None;
+            rtb.Font = new Font("Cascadia Code", 10F);
+        }
+
+        private void StyleButton(Button btn, bool isPrimary)
+        {
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 60, 60);
+            if (isPrimary)
+            {
+                btn.BackColor = AccentColor;
+                btn.ForeColor = Color.White;
+            }
+            else
+            {
+                btn.BackColor = Color.FromArgb(40, 40, 40);
+                btn.ForeColor = TextColor;
+            }
+            btn.Cursor = Cursors.Hand;
+        }
+
+        private void StyleCheckBox(CheckBox cb)
+        {
+            cb.ForeColor = TextColor;
+        }
+
         private void themeToggleCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            ApplyTheme(this, themeToggleCheckBox.Checked);
+            // For now, keep it fixed to dark or implement a toggle if needed
         }
 
         private void button1_Click(object sender, EventArgs e)
